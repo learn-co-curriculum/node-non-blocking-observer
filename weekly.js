@@ -8,6 +8,5 @@ job.on('done', function(details){
 
 })
 
-
 job.process()
 // job.emit('start')

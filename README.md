@@ -151,6 +151,12 @@ The result is similar to invoking `job.process()` directly.
 job.emit('start')
 ```
 
+## HTTP Request
+
+You've learned how to implement classes which inherit events. You also know how to listen and trigger events. Let's do something fun and see how to apply this knowledge to the probably one of the most important modules in Node—`http`.
+
+You see, `http` as well as many other core modules, use observer pattern. For example, you must listen to events when receiving data from an outgoing HTTP request (your script is a client).
+
 
 
 ## Resources
