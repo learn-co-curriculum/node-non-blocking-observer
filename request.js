@@ -1,43 +1,21 @@
 var http = require('http')
+var fs = require('fs')
 
-
-
-  http.get({
-      host: 'localhost',
-      port: 3000,
-      path: '/'
-    }, function(response) {
-      // Continuously update stream with data
-      var body = ''
-      response.on('data', function(d) {
-        body += d
-      })
-      response.on('end', function() {
-        // Data reception is done, do whatever with it!
-        // var parsed = JSON.parse(body)
-        // console.log(parsed)
-        console.log(null, body)
+var request = http.get('http://localhost:3000', function(response) {
+  // Continuously update stream with data
+  var body = ''
+  response.on('data', function(chunk) {
+    body += chunk
+  })
+  response.on('end', function() {
+    // Data reception is done, do whatever with it!
+    console.log(body)
+    fs.writeFile('./crawler.html', body, function(){
+      console.log('finished writing')
     })
   })
+})
 
-
-// console.log(http.request.toString());
-// http.request({
-//     host: 'localhost',
-//     port: 3000,
-//     path: '/',
-//     method: 'GET'
-//   }, function(error, response) {
-//     console.log('yo', response);
-//     // Continuously update stream with data
-//     var body = ''
-//     response.on('data', function(d) {
-//       body += d
-//     })
-//     response.on('end', function() {
-//       // Data reception is done, do whatever with it!
-//       var parsed = JSON.parse(body)
-//       // console.log(parsed)
-//       console.log(null, parsed)
-//   })
-// })
+request.on('error', function(error){
+  console.error(error)
+})
