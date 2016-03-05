@@ -155,8 +155,52 @@ job.emit('start')
 
 You've learned how to implement classes which inherit events. You also know how to listen and trigger events. Let's do something fun and see how to apply this knowledge to the probably one of the most important modules in Node—`http`.
 
-You see, `http` as well as many other core modules, use observer pattern. For example, you must listen to events when receiving data from an outgoing HTTP request (your script is a client).
+You see, `http` as well as many other core modules, use observer pattern. For example, you must listen to events when receiving data from an outgoing HTTP GET request (your script is a client). Firstly, import the modules:
 
+```js
+var http = require('http')
+var fs = require('fs')
+```
+
+Create a GET request and save the reference in the variable. The request has a callback with `response`. You need to listen to `data` event and concatenate chunks of data. Think about the data as coming in a stream of small chunks/parts. Once all the parts are there, the method will emit `end`. So by listening to `end` we can print `body` and write it to a file rest assured that we got the complete response from the server!
+
+```js
+var request = http.get('http://localhost:3000', function(response) {
+  // Continuously update stream with data
+  var body = ''
+  response.on('data', function(chunk) {
+    body += chunk
+  })
+  response.on('end', function() {
+    // Data reception is done, do whatever with it!
+    console.log(body)
+    fs.writeFile('./crawler.html', body, function(){
+      console.log('finished writing')
+    })
+  })
+})
+```
+
+Don't forget to listen to `error` for the request. It will tell you if the server is unavailable with `ECONNREFUSED` error.
+
+```js
+request.on('error', function(error){
+  console.error(error)
+})
+```
+
+The server is a modified version of the Hello World server from earlier lessons. You can replace the URL in `request.js` to something from the Internet like <http://webapplog.com> or <http://azat.co>. This will be more fun. The HTML will be save to the file `crawler.html`. 
+
+When working with RESTful API, you'll need to parse JSON from a string to an object. You can use `JSON.parse()` for that in the `end` event listener handler:
+
+```js
+  response.on('end', function() {
+    var body = JSON.parse(body)
+    console.log(body)
+  })
+```
+
+Event emitters are everywhere in Node. By learning them, you can organize your asynchronous code better. Also, now you create HTTP agents/clients. Fancy!
 
 
 ## Resources
