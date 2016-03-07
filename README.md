@@ -2,15 +2,14 @@
 
 ## Overview
 
-You've learned that you can use modules and the callback patterns to mitigate some of the issues of the callback hell. However, there are other ways to organize your asynchronous code. The problem with callback even in modules is that there is only one type of the event, i.e., end result. We cannot trigger some intermittent logic. Also we cannot specify multiple callbacks (unless we pass multiple arguments or an array of callback which is hard to comprehend). We cannot easily tell the system to execute the callback just once if we have multiple places where that callback is called.
+You've learned that you can use modules and the callback patterns to mitigate some of the issues of the callback hell. However, there are other ways to organize your asynchronous code. The problem with callbacks, even in modules, is that there is only one type of the event, i.e., an end result. We cannot trigger some intermittent logic. Also we cannot specify multiple callbacks (unless we pass multiple arguments or an array of callbacks which is hard to comprehend). We cannot easily tell the system to execute the callback just once if we have multiple places where that callback is called.
 
-This lesson will cover the observer pattern implemented by event emitters. It's cornerstone to the Node, because it's use in many core modules as well as many npm modules (so called userland). Knowing this pattern will help you to use the modules. In addition, you'll be able to write your own modules/classes with this pattern. Also, in this code-along lesson you will see how to build a web crawler. It will take a URL and save the HTTP response into a file. 
+This lesson will cover the observer pattern implemented by event emitters. It's cornerstone to Node, because of it's use in many core modules as well as many npm modules (so called userland). Knowing this pattern will help you to use the modules. In addition, you'll be able to write your own modules/classes with this pattern. Also, in this code-along lesson you will see how to build a web crawler. It will take a URL and save the HTTP response into a file. 
 
 ## Objectives
 
-1. Describe event emitter pattern
+1. Explain the event emitter pattern
 1. Implement an event emitter (inheriting from the base class with util.inherits)
-1. Observe the event emitter pattern in most of Node core modules
 1. Describe about some of the event from http module
 1. Describe how to parse the information from the response
 
@@ -30,7 +29,7 @@ var events  = require('events')
 var emitter = new events.EventEmitter()
 ```
 
-To illustrate how Event Emitter works, we will create an object which can listen to event `knock`. Go ahead and create a file `knock-knock.js`. Create the `emitter` object as shown above, and implement two event listeners:
+To illustrate how Event Emitter works, we will create an object which can listen to the event `knock`. Go ahead and create a file `knock-knock.js`. Create the `emitter` object as shown above, and implement two event listeners:
 
 
 ```js
@@ -69,15 +68,15 @@ Who's there?
 Go away!
 ```
 
-To summarize, we defined two event different listeners for the same arbitrary (means you can name this event anyway you want) event `knock`. Then we triggered the event twice. 
+To summarize, we defined two different event listeners for the same arbitrary event `knock`. Then we triggered the event twice. 
 
 Additional methods include:
 
 * `emitter.listeners(eventName)`: List the event listeners associated with the `eventName` event
-* `emitter.once(eventName, listener)`: Create event listener for `eventName` and execute it just one time, i.e., analogous to `.on()` but fires only once.
+* `emitter.once(eventName, listener)`: Create event listener for `eventName` and execute it just one time. This is similar to `.on()` but fires only once.
 * `emitter.removeListener(eventName, listener)`: Remove event listener for `eventName`
 
-In our knock-knock example, we used the observer object `event`. It's not very interesting because it didn't do much. What's more interesting and useful is that we can extend Event Emitter properties and methods into ANY OBJECT/class. There's this convenient function `inherits()` from the core `util` module. It take child (`fancyChildObjectWithEvents`) and parent objects, and make the child inherit from the parent (Event Emitter).
+In our knock-knock example, we used the observer object `event`. It's not very interesting because it didn't do much. What's more interesting and useful is that we can extend Event Emitter properties and methods into ANY OBJECT/class. There's this convenient function `inherits()` from the core `util` module. It takes a child (`fancyChildObjectWithEvents`) and parent objects, and makes the child inherit from the parent (Event Emitter).
 
 ```js
 var util = require('util')
@@ -112,6 +111,8 @@ var Job = function Job() {
 }
 ```
 
+
+
 Now, extend the events and export the class:
 
 ```js
@@ -134,7 +135,7 @@ job.on('done', function(details){
 job.process()
 ```
 
-This is how you customize behavior of your classes by specifying event listeners later in different files! As mentioned before, the advantage over callbacks is that you can have multiple events, remove them, execute them once, etc. The reverse is possible, i.e., having an event listener in `job.js` and triggering the event in `weekly.js`. 
+This is how you customize behavior of your classes by specifying event listeners later in different files! As mentioned before, the advantage of this over callbacks is that you can have multiple events, remove them, execute them once, etc. The reverse is possible as well.You can have an event listener in `job.js` and trigger the event in `weekly.js`. 
 
 ```js
 // job.js
@@ -153,16 +154,18 @@ job.emit('start')
 
 ## HTTP Request
 
-You've learned how to implement classes which inherit events. You also know how to listen and trigger events. Let's do something fun and see how to apply this knowledge to the probably one of the most important modules in Node—`http`.
+You've learned how to implement classes which inherit events. You also know how to listen for and trigger events. Let's do something fun and see how to apply this knowledge to the probably one of the most important modules in Node—`http`.
 
-You see, `http` as well as many other core modules, use observer pattern. For example, you must listen to events when receiving data from an outgoing HTTP GET request (your script is a client). Firstly, import the modules:
+`http` as well as many other core modules use the observer pattern. For example, your server will need to listen to events in order to process data from an incoming HTTP `GET` request.
+
+First, you need to import the modules:
 
 ```js
 var http = require('http')
 var fs = require('fs')
 ```
 
-Create a GET request and save the reference in the variable. The request has a callback with `response`. You need to listen to `data` event and concatenate chunks of data. Think about the data as coming in a stream of small chunks/parts. Once all the parts are there, the method will emit `end`. So by listening to `end` we can print `body` and write it to a file rest assured that we got the complete response from the server!
+Create a GET request and save the reference in the variable. The request has a callback with the `response` object. Your server will need to listen for the `data` event and concatenate chunks of data. Think about the data as coming in a stream of small parts. Once all the parts are there, the method will emit `end`. So by listening to `end` we can print `body` and write it to a file rest assured that we got the complete response from the server!
 
 ```js
 var request = http.get('http://localhost:3000', function(response) {
@@ -191,7 +194,7 @@ request.on('error', function(error){
 
 The server is a modified version of the Hello World server from earlier lessons. You can replace the URL in `request.js` to something from the Internet like <http://webapplog.com> or <http://azat.co>. This will be more fun. The HTML will be save to the file `crawler.html`. 
 
-When working with RESTful API, you'll need to parse JSON from a string to an object. You can use `JSON.parse()` for that in the `end` event listener handler:
+When working with a RESTful API, you'll need to parse JSON from a string to an object. You can use `JSON.parse()` for that in the `end` event listener handler:
 
 ```js
   response.on('end', function() {
